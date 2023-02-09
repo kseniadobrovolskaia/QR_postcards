@@ -3,6 +3,13 @@
 
 
 #include "Raytracer.hpp"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+int envmap_width, envmap_height;
+std::vector<Vec3f> envmap;
 
 
 class Render
@@ -33,21 +40,49 @@ Render::Render(const size_t width, const size_t height, const float fov) : width
 
 void render(const std::vector<Sphere> &spheres, const std::vector<Light> &lights)
 {
-    const int width_ = 1024;
-    const int height_ = 768;
+    const int width_ = 600;
+    const int height_ = 400;
     const int fov_ = M_PI / 2.;      //vertical viewing angle
+
+    //Vec3f max_corner, min_corner;
+    //duck.get_bbox(min_corner, max_corner);
 
     std::vector<Vec3f> framebuffer_(width_ * height_);
     float ray_x, ray_y, ray_z;
 
-    for (size_t pix = 0; pix < height_ * width_; pix++)
+    Vec3f norm, hit;
+    Material material;
+
+    for (size_t i = 0; i < height_; i++)
     {
-        ray_x =  (pix % width_ + 0.5) -  width_ / 2.;
-        ray_y = -(pix / width_ + 0.5) + height_ / 2.;
-        ray_z = -height_ / (2. * tan(fov_ / 2.));
-        Vec3f ray = Vec3f(ray_x, ray_y, ray_z).normalize();
-        framebuffer_[pix] = cast_ray(Vec3f(0, 0, 0), ray, spheres, lights);
+        for (size_t j = 0; j < width_; j++)
+        {
+            ray_x =  (j + 0.5) -  width_ / 2.;
+            ray_y = -(i + 0.5) + height_ / 2.;
+            ray_z = -height_ / (2. * tan(fov_ / 2.));
+            Vec3f ray = Vec3f(ray_x, ray_y, ray_z).normalize();
+
+            //std::cout << "текущая точка: (" << ray_x << ", " << ray_y << ", " << ray_z << ")\n";
+            framebuffer_[j + i * width_] = cast_ray(Vec3f(0, 0, 0), ray, spheres, lights);
+            
+            if (framebuffer_[j + i * width_] == Vec3f(0.2, 0.7, 0.8))
+            {
+                framebuffer_[j + i * width_] = envmap[j + i * width_];
+            }
+        }
     }
+
+    std::vector<unsigned char> pixmap(width_*height_*3);
+    for (size_t i = 0; i < height_*width_; ++i) {
+        Vec3f &c = framebuffer_[i];
+        float max = std::max(c[0], std::max(c[1], c[2]));
+        if (max>1) c = c*(1./max);
+        for (size_t j = 0; j<3; j++) {
+            pixmap[i*3+j] = (unsigned char)(255 * std::max(0.f, std::min(1.f, framebuffer_[i][j])));
+        }
+    }
+    stbi_write_jpg("out.ppm", width_, height_, 3, pixmap.data(), 100);
+    #if 0
 
     std::ofstream ofs;
     ofs.open("out.ppm");
@@ -71,6 +106,7 @@ void render(const std::vector<Sphere> &spheres, const std::vector<Light> &lights
     }
 
     ofs.close();
+    #endif
 }
 
 

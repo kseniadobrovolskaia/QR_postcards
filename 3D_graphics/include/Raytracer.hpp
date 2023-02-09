@@ -2,8 +2,10 @@
 #define RAYTRACER_H
 
 
-#include "Sphere.hpp"
+#include "Model.hpp"
 
+Material red(Vec4f(0.6, 0.3, 0.1, 0), Vec3f(1, 0, 0), 50., 1.);
+Model duck("../duck.obj", red);
 
 Vec3f cast_ray(const Vec3f &dot, const Vec3f &ray, const std::vector<Sphere> &spheres, const std::vector<Light> &lights, size_t depth = 0);
 bool scene_intersect(const Vec3f &dot, const Vec3f &ray, const std::vector<Sphere> &spheres,
@@ -19,6 +21,10 @@ Vec3f cast_ray(const Vec3f &dot, const Vec3f &ray, const std::vector<Sphere> &sp
 
 	if (depth > 3 || !scene_intersect(dot, ray, spheres, hit, norm, material))
 	{
+		if (material.diff_color() == Vec3f(1, 0, 0))
+		{
+			return Vec3f(1, 0, 0);
+		}
 		return Vec3f(0.2, 0.7, 0.8);
 	}
 
@@ -63,15 +69,20 @@ bool scene_intersect(const Vec3f &dot, const Vec3f &ray, const std::vector<Spher
 {
     float dist_i, dist_to_sphere = std::numeric_limits<float>::max();
 
-    for (size_t i=0; i < spheres.size(); i++)
+    // for (size_t i=0; i < spheres.size(); i++)
+    // {
+    //     if (spheres[i].ray_intersect(dot, ray, dist_i) && (dist_i < dist_to_sphere))
+    //     {
+    //         dist_to_sphere = dist_i;
+    //         hit = dot + ray * dist_i;
+    //         norm = (hit - spheres[i].center()).normalize();
+    //         material = spheres[i].material();
+    //     }
+    // }
+
+    if (duck.model_intersect(dot, ray, hit, norm, material) && ((hit - dot).norm() < dist_to_sphere))
     {
-        if (spheres[i].ray_intersect(dot, ray, dist_i) && dist_i < dist_to_sphere)
-        {
-            dist_to_sphere = dist_i;
-            hit = dot + ray * dist_i;
-            norm = (hit - spheres[i].center()).normalize();
-            material = spheres[i].material();
-        }
+    	dist_to_sphere = (hit - dot).norm();
     }
 
     return dist_to_sphere != std::numeric_limits<float>::max();

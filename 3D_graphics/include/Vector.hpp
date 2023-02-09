@@ -1,6 +1,9 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+
+#define _USE_MATH_DEFINES
+
 #include <fstream>
 #include <cmath>
 #include <vector>
@@ -9,6 +12,8 @@
 #include <exception>
 #include <algorithm>
 #include <limits>
+#include <string>
+#include <sstream>
 
 
 template <size_t dim, typename T>
@@ -141,6 +146,14 @@ public:
     
     T& operator[](const size_t i);
     const T& operator[](const size_t i) const;
+    T& x() { return x_; }
+    const T& x() const { return x_; }
+    T& y() { return y_; }
+    const T& y() const { return y_; }
+    T& z() { return z_; }
+    const T& z() const { return z_; }
+
+    bool operator==(const Vector<3, T> &vec) const;
 
     template<typename U>
     Vector<3, T> & operator*=(const U &elem);
@@ -178,10 +191,17 @@ const T & Vector<3, T>::operator[](const size_t i) const
 }
 
 
+template <typename T>
+bool Vector<3, T>::operator==(const Vector<3, T> &vec) const 
+{
+    return (x_ == vec.x_) && (y_ == vec.y_) && (z_ == vec.z_);
+}
+
+
 template <typename T> 
 Vector<3, T> cross(const Vector<3,T> &v1, const Vector<3,T> &v2) //vector mult
 {
-    return Vector<3,T>(v1.y*v2.z - v1.z*v2.y, v1.z*v2.x - v1.x*v2.z, v1.x*v2.y - v1.y*v2.x);
+    return Vector<3,T>(v1.y()*v2.z() - v1.z()*v2.y(), v1.z()*v2.x() - v1.x()*v2.z(), v1.x()*v2.y() - v1.y()*v2.x());
 }
 
 

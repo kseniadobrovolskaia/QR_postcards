@@ -9,7 +9,7 @@ class Material
     Vec4f albedo_;            // albedo[0] - diffuse reflection, albedo[1] - mirror reflection, albedo[2] - reflection coefficient, albedo[3] - refraction
     Vec3f diff_color_;        // diffuse color
     float specular_exponent_; // gloss factor
-    float refractive_index_;
+    float refractive_index_;  
 
 public:
 
