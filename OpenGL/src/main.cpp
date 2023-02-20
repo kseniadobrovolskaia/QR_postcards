@@ -295,15 +295,22 @@ int main()
         shaderProgramSimple.use_Program();
 
         glm::mat4 model(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 3.0f));
+        glm::mat3 norm_model(1.0f);
+        model = glm::translate(model, glm::vec3(0, 0.0f, 3.0f));
         model = glm::rotate(model, glm::radians((GLfloat)glfwGetTime() * 50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+
+        norm_model = glm::mat3(transpose(inverse(model)));
             
         shaderProgramSimple.set_matrix4fv("model", model);
+        shaderProgramSimple.set_matrix3fv("norm_model", norm_model);
         shaderProgramSimple.set_matrix4fv("view", view);
         shaderProgramSimple.set_matrix4fv("projection", projection);
         
         glm::vec3 color = glm::vec3(1.0f, 0.0f, 1.0f), light_color = glm::vec3(1.0f, 1.0f, 1.0f);
 
+        glm::vec3 view_pos = camera.get_pos();
+
+        shaderProgramSimple.set_vec3f("view_pos", view_pos);
         shaderProgramSimple.set_vec3f("obj_color", color);
         shaderProgramSimple.set_vec3f("light_color", light_color);
         shaderProgramSimple.set_vec3f("light_pos", lightPos);

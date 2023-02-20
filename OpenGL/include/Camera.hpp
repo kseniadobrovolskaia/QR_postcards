@@ -27,6 +27,7 @@ public:
 	void make_move(float delta_time);
 	glm::mat4 get_view_matrix() const;
 	void set_firstXY(GLFWwindow* window);
+    glm::vec3 get_pos() const { return pos_; };
 };
 
 
